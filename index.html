@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Test</title>
+</head>
+
+<body>
+  <img id="image">
+  <img id="picture">
+  <button onclick="switchi()">Switch</button>
+  <button onclick="screenshot()">Capture</button>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
+  <script type="text/javascript">
+    const socket = io.connect('http://192.168.43.68:3000');
+    socket.on('image', (image) => {
+      const imageElm = document.getElementById('image');
+      imageElm.src = `data:image/jpeg;base64,${image}`;
+    });
+    socket.on('picture', (image) => {
+      const imageElm = document.getElementById('picture');
+      imageElm.src = `data:image/jpeg;base64,${image}`;
+    });
+  </script>
+</body>
+
+</html>
