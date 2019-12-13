@@ -270,6 +270,8 @@ for camera in all_cameras:
     # 2: VideoCapture de la caméra
     # 3: Liste des clients connectés au flux
     # 4: Référence vers le thread de streaming
+    if id_cpt == 1:
+        continue
     capture_ref = cv2.VideoCapture(camera)
     print("camera opened")
     capture_ref.set(3, 320)
