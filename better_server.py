@@ -271,10 +271,12 @@ for camera in all_cameras:
     # 3: Liste des clients connectés au flux
     # 4: Référence vers le thread de streaming
     capture_ref = cv2.VideoCapture(camera)
+    print("camera opened")
     capture_ref.set(3, 320)
     capture_ref.set(4, 240)
     params = ["image", capture_ref, "camera_" + str(id_cpt), False]
     camera_captures.append((camera, capture_ref, [], setInterval(1/float(fps), sendImage, params)))
+    print("thread created")
     id_cpt = id_cpt+1
 
 if __name__ == '__main__':
