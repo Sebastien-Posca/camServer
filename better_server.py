@@ -7,7 +7,6 @@ import threading
 import cv2
 import base64
 import subprocess
-import uuid
 
 class setInterval:
     def __init__(self, interval, action, parameters=None, iter=0):

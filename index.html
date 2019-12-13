@@ -8,18 +8,17 @@
 
 <body>
   <img id="image">
-  <img id="picture">
-  <button onclick="switchi()">Switch</button>
-  <button onclick="screenshot()">Capture</button>
+  <img id="image2">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
   <script type="text/javascript">
-    const socket = io.connect('http://192.168.43.68:3000');
+    const socket = io.connect('http://192.168.43.14:3000');
+    const socket2 = io.connect('http://192.168.43.14:3001');
     socket.on('image', (image) => {
       const imageElm = document.getElementById('image');
       imageElm.src = `data:image/jpeg;base64,${image}`;
     });
-    socket.on('picture', (image) => {
-      const imageElm = document.getElementById('picture');
+    socket2.on('image', (image) => {
+      const imageElm = document.getElementById('image2');
       imageElm.src = `data:image/jpeg;base64,${image}`;
     });
   </script>
