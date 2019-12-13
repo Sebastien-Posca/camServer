@@ -9,6 +9,10 @@
 <body>
   <img id="image">
   <img id="image2">
+  <button onclick="picturePicam()">Capture picam</button>
+  <button onclick="pictureUsbcam()">Capture usbcam</button>
+  <img id="picturePicam">
+  <img id="pictureUsbcam">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
   <script type="text/javascript">
     const socket = io.connect('http://192.168.43.14:3000');
@@ -21,6 +25,20 @@
       const imageElm = document.getElementById('image2');
       imageElm.src = `data:image/jpeg;base64,${image}`;
     });
+
+    function picturePicam() {
+      socket.emit('picture', 100, (image) => {
+        const imageElm = document.getElementById('picturePicam');
+        imageElm.src = `data:image/jpeg;base64,${image}`;
+      });
+    }
+
+    function pictureUsbcam() {
+      socket2.emit('picture', 100, (image) => {
+        const imageElm = document.getElementById('pictureUsbcam');
+        imageElm.src = `data:image/jpeg;base64,${image}`;
+      });
+    }
   </script>
 </body>
 

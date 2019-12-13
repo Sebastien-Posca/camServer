@@ -91,6 +91,18 @@ def sendImage(params):
         return image
     return False
 
+def sendPicture(params):
+    flag, frame = params[1].read()
+    if flag:
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 20]
+        if not isinstance(params[3], bool) and isinstance(params[3], int) and params[3] >= 0 and params[3] <= 100:
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), params[3]]
+        image = cv2.imencode('.jpg', frame, encode_param)[1].tostring()
+        image = base64.b64encode(image)
+        image = image.decode('utf-8')
+        return image
+    return False
+
 @sio.event
 def connect(sid, env):
     print('## LOG ## Client connected, sid: ' + str(sid))
@@ -104,7 +116,12 @@ def camera_count(sid, data):
     print("## LOG ## Camera count request")
     return len(camera_captures)
 
-#bind_client(666, usb_id, False)
+@sio.event
+def picture(sid, data):
+    print('## LOG ## Client requested a picture')
+    params = ["picture", picam_capture, 666, data]
+    return sendPicture(params)
+
 id_cpt = 0
 if len(picam) > 0:
     picam_capture = cv2.VideoCapture(picam[0])
