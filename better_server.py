@@ -9,6 +9,35 @@ import base64
 import subprocess
 import uuid
 
+class setInterval:
+    def __init__(self, interval, action, parameters=None, iter=0):
+        self.interval = interval
+        self.action = action
+        self.stopEvent = threading.Event()
+        self.parameters = parameters
+        self.iter = iter
+        self.currIter = iter
+        thread = threading.Thread(target=self.__setInterval)
+        thread.start()
+
+    def __setInterval(self):
+        nextTime = time.time()+self.interval
+        if self.iter > 0:
+            while not self.stopEvent.wait(nextTime-time.time()):
+                nextTime += self.interval
+                self.action(self.parameters)
+                self.currIter = self.currIter - 1
+                if self.currIter == 0:
+                    self.stopEvent.set()
+        else:
+            while not self.stopEvent.wait(nextTime-time.time()):
+                nextTime += self.interval
+                self.action(self.parameters)
+
+    def cancel(self):
+        print('## LOG ## Streaming thread stopped')
+        self.stopEvent.set()
+
 # Récupération du lien vers la picam
 picam_proc = subprocess.Popen(["./picam.sh"], stdout=subprocess.PIPE)
 picam = picam_proc.stdout.read().decode("utf-8").strip().split()
@@ -28,18 +57,14 @@ eventlet.monkey_patch()
 all_cameras = picam + usbcam
 camera_captures = []
 usb_id = len(picam)
+fps = 10
+
 
 if len(all_cameras) == 0:
     camera_captures.append([0, None, [], None])
 
-for camera in all_cameras:
-    # 1: Nom de la caméra
-    # 2: VideoCapture de la caméra
-    # 3: Liste des clients connectés au flux
-    # 4: Référence vers le thread de streaming
-    camera_captures.append((camera, None, [], None))
 
-fps = 10
+
 print('## LOG ## Live FPS: ' + str(fps))
 
 
@@ -78,36 +103,6 @@ def html_picture():
 
 sio = socketio.Server(cors_allowed_origins="*")
 app = socketio.WSGIApp(sio, wsgi_handler)
-
-
-class setInterval:
-    def __init__(self, interval, action, parameters=None, iter=0):
-        self.interval = interval
-        self.action = action
-        self.stopEvent = threading.Event()
-        self.parameters = parameters
-        self.iter = iter
-        self.currIter = iter
-        thread = threading.Thread(target=self.__setInterval)
-        thread.start()
-
-    def __setInterval(self):
-        nextTime = time.time()+self.interval
-        if self.iter > 0:
-            while not self.stopEvent.wait(nextTime-time.time()):
-                nextTime += self.interval
-                self.action(self.parameters)
-                self.currIter = self.currIter - 1
-                if self.currIter == 0:
-                    self.stopEvent.set()
-        else:
-            while not self.stopEvent.wait(nextTime-time.time()):
-                nextTime += self.interval
-                self.action(self.parameters)
-
-    def cancel(self):
-        print('## LOG ## Streaming thread stopped')
-        self.stopEvent.set()
 
 # 0 : channel
 # 1 : camera source
@@ -148,7 +143,7 @@ def bind_client(sid, camera_id, stream=True):
     camera_captures[camera_id] = (temp[0], temp[1], temp[2] + [sid], temp[3])
     sio.enter_room(sid, "camera_" + str(camera_id))
     print("## LOG ## Client binded to room camera_" + str(camera_id))
-    start(stream)
+    #start(stream)
 
 
 def remove_client(sid):
@@ -161,7 +156,7 @@ def remove_client(sid):
             sio.leave_room(sid, "camera_" + str(i))
             print("## LOG ## Client removed from room camera_" + str(i))
             break
-    stop()
+    #stop()
 
 
 def start(stream=True):
@@ -268,7 +263,17 @@ def picture(sid, data):
         return sendImage(params)
     return False
 
-bind_client(666, usb_id, False)
+#bind_client(666, usb_id, False)
+id_cpt = 0
+for camera in all_cameras:
+    # 1: Nom de la caméra
+    # 2: VideoCapture de la caméra
+    # 3: Liste des clients connectés au flux
+    # 4: Référence vers le thread de streaming
+    capture_ref = cv2.VideoCapture(camera)
+    params = ["image", capture_ref, "camera_" + str(id_cpt), False]
+    camera_captures.append((camera, capture_ref, [], setInterval(1/float(fps), sendImage, params)))
+    id_cpt = id_cpt+1
 
 if __name__ == '__main__':
     eventlet.wsgi.server(eventlet.listen(('', 3000)), app)
