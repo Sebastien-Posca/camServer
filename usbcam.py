@@ -124,7 +124,7 @@ def picture(sid, data):
 
 id_cpt = 0
 if len(usbcam) > 0:
-    usbcam_capture = cv2.VideoCapture(usbcam[1])
+    usbcam_capture = cv2.VideoCapture(usbcam[0])
     print("usbcam opened")
     #capture_ref.set(3, 320)
     #capture_ref.set(4, 240)
