@@ -15,8 +15,8 @@
   <img id="pictureUsbcam">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.dev.js"></script>
   <script type="text/javascript">
-    const socket = io.connect('http://192.168.43.14:3000');
-    const socket2 = io.connect('http://192.168.43.14:3001');
+    const socket = io.connect('http://192.168.43.175:3000');
+    const socket2 = io.connect('http://192.168.43.175:3001');
     socket.on('image', (image) => {
       const imageElm = document.getElementById('image');
       imageElm.src = `data:image/jpeg;base64,${image}`;
